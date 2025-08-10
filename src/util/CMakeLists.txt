@@ -1,4 +1,6 @@
-add_library(util
+# src/util/CMakeLists.txt
+
+add_library(util STATIC
   audio_stream.cpp
   audio_stream.h
   cd_image.cpp
@@ -74,17 +76,45 @@ add_library(util
 )
 
 target_precompile_headers(util PRIVATE "pch.h")
-target_include_directories(util PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_include_directories(util PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_link_libraries(util PUBLIC common simpleini imgui)
-target_link_libraries(util PRIVATE libchdr lzma JPEG::JPEG PNG::PNG WebP::libwebp plutosvg::plutosvg ZLIB::ZLIB SoundTouch::SoundTouchDLL xxhash zstd::libzstd_shared reshadefx)
 
+target_compile_features(util PRIVATE cxx_std_20)
+
+target_include_directories(util
+  PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(util
+  PUBLIC
+    common
+    simpleini
+    imgui
+  PRIVATE
+    libchdr
+    lzma
+    JPEG::JPEG
+    PNG::PNG
+    WebP::libwebp
+    plutosvg::plutosvg
+    ZLIB::ZLIB
+    SoundTouch::SoundTouchDLL
+    xxhash
+    zstd::libzstd_shared
+    reshadefx
+)
+
+set_target_properties(util PROPERTIES
+  CXX_VISIBILITY_PRESET hidden
+  VISIBILITY_INLINES_HIDDEN ON
+)
+
+# ☑ Platform toggles
 if(ENABLE_X11)
   target_sources(util PRIVATE
     x11_tools.cpp
     x11_tools.h
   )
-  target_compile_definitions(util PRIVATE "-DENABLE_X11=1")
+  target_compile_definitions(util PRIVATE ENABLE_X11=1)
   target_include_directories(util PRIVATE
     "${X11_xcb_INCLUDE_PATH}"
     "${X11_xcb_randr_INCLUDE_PATH}"
@@ -93,10 +123,11 @@ if(ENABLE_X11)
 endif()
 
 if(ENABLE_WAYLAND)
-  target_compile_definitions(util PRIVATE "-DENABLE_WAYLAND=1")
+  target_compile_definitions(util PRIVATE ENABLE_WAYLAND=1)
 endif()
 
 if(ENABLE_OPENGL)
+  target_compile_definitions(util PUBLIC ENABLE_OPENGL=1)
   target_sources(util PRIVATE
     opengl_context.cpp
     opengl_context.h
@@ -110,7 +141,6 @@ if(ENABLE_OPENGL)
     opengl_texture.cpp
     opengl_texture.h
   )
-  target_compile_definitions(util PUBLIC "ENABLE_OPENGL=1")
   target_link_libraries(util PRIVATE glad)
 
   if(WIN32)
@@ -125,7 +155,7 @@ if(ENABLE_OPENGL)
       opengl_context_egl.cpp
       opengl_context_egl.h
     )
-    target_compile_definitions(util PRIVATE "-DENABLE_EGL=1")
+    target_compile_definitions(util PRIVATE ENABLE_EGL=1)
 
     if(ENABLE_X11)
       target_sources(util PRIVATE
@@ -156,6 +186,7 @@ if(ENABLE_OPENGL)
 endif()
 
 if(ENABLE_VULKAN)
+  target_compile_definitions(util PUBLIC ENABLE_VULKAN=1)
   target_sources(util PRIVATE
     vulkan_builders.cpp
     vulkan_builders.h
@@ -174,16 +205,16 @@ if(ENABLE_VULKAN)
     vulkan_texture.cpp
     vulkan_texture.h
   )
-  target_compile_definitions(util PUBLIC "ENABLE_VULKAN=1")
   target_link_libraries(util PUBLIC vulkan-headers)
 endif()
 
-# shaderc/spirv-cross is loaded dynamically to reduce module loads on startup.
+# 📦 Dynamic shaderc/spirv includes only
 get_target_property(SHADERC_INCLUDE_DIR Shaderc::shaderc_shared INTERFACE_INCLUDE_DIRECTORIES)
 get_target_property(SPIRV_CROSS_INCLUDE_DIR spirv-cross-c-shared INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(util PUBLIC ${SHADERC_INCLUDE_DIR} ${SPIRV_CROSS_INCLUDE_DIR})
 
 if(NOT ANDROID)
+  target_compile_definitions(util PUBLIC ENABLE_SDL)
   target_sources(util PRIVATE
     cubeb_audio_stream.cpp
     sdl_audio_stream.cpp
@@ -196,17 +227,14 @@ if(NOT ANDROID)
       opengl_context_sdl.h
     )
   endif()
-  target_compile_definitions(util PUBLIC
-    ENABLE_SDL
-  )
   target_link_libraries(util PUBLIC
     cubeb
     SDL3::SDL3
   )
-  # FFmpeg loaded dynamically on demand.
   target_include_directories(util PUBLIC ${FFMPEG_INCLUDE_DIRS})
 endif()
 
+# 🎮 Platform specifics
 if(WIN32)
   target_sources(util PRIVATE
     d3d_common.cpp
@@ -240,15 +268,17 @@ if(WIN32)
     xinput_source.cpp
     xinput_source.h
   )
-  target_link_libraries(util PRIVATE d3d12ma)
-  target_link_libraries(util PRIVATE winmm.lib Dwmapi.lib winhttp.lib)
-
-  if(CMAKE_BUILD_TYPE MATCHES "Debug|Devel")
-    target_link_libraries(util PRIVATE WinPixEventRuntime::WinPixEventRuntime)
-  endif()
+  target_link_libraries(util PRIVATE
+    d3d12ma
+    winmm
+    Dwmapi
+    winhttp
+  )
+  target_link_libraries(util PRIVATE
+    $<$<CONFIG:Debug,Devel>:WinPixEventRuntime::WinPixEventRuntime>
+  )
 elseif(APPLE)
   include(AddMetalSources)
-
   set(MAC_SOURCES
     metal_device.h
     metal_device.mm
@@ -257,79 +287,20 @@ elseif(APPLE)
     metal_stream_buffer.mm
     platform_misc_mac.mm
   )
-  set(METAL_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/metal_shaders.metal"
-  )
+  set(METAL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/metal_shaders.metal")
   set_property(GLOBAL PROPERTY UTIL_METAL_SOURCES ${METAL_SOURCES})
   target_sources(util PRIVATE ${MAC_SOURCES})
-  find_library(IOK_LIBRARY IOKit REQUIRED)
-  find_library(METAL_LIBRARY Metal)
-  find_library(QUARTZCORE_LIBRARY QuartzCore)
-  target_link_libraries(util PRIVATE ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} ${IOK_LIBRARY})
   set_source_files_properties(${MAC_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS TRUE)
+
+  find_library(IOK_LIBRARY IOKit REQUIRED)
+  find_library(METAL_LIBRARY Metal REQUIRED)
+  find_library(QUARTZCORE_LIBRARY QuartzCore REQUIRED)
+  target_link_libraries(util PRIVATE ${METAL_LIBRARY} ${QUARTZCORE_LIBRARY} ${IOK_LIBRARY})
 elseif(NOT ANDROID)
-  target_sources(util PRIVATE
-    platform_misc_unix.cpp
-  )
+  target_sources(util PRIVATE platform_misc_unix.cpp)
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(DBUS REQUIRED dbus-1)
   target_include_directories(util PRIVATE ${DBUS_INCLUDE_DIRS})
 
   if(LINUX)
-    target_link_libraries(util PRIVATE UDEV::UDEV)
-  endif()
-endif()
-
-if(NOT WIN32 AND NOT ANDROID)
-  target_sources(util PRIVATE
-    http_downloader_curl.cpp
-  )
-  target_link_libraries(util PRIVATE
-    CURL::libcurl
-  )
-endif()
-
-function(add_util_resources target)
-  if(APPLE)
-    get_property(UTIL_METAL_SOURCES GLOBAL PROPERTY UTIL_METAL_SOURCES)
-    add_metal_sources(${target} ${UTIL_METAL_SOURCES})
-
-    # Copy MoltenVK into the bundle
-    unset(MOLTENVK_PATH CACHE)
-    find_file(MOLTENVK_PATH NAMES
-      libMoltenVK.dylib
-      lib/libMoltenVK.dylib
-    )
-    if (MOLTENVK_PATH)
-      target_sources(${target} PRIVATE "${MOLTENVK_PATH}")
-      set_source_files_properties("${MOLTENVK_PATH}" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-      message(STATUS "Using MoltenVK from ${MOLTENVK_PATH}")
-    else()
-      message(WARNING "MoltenVK not found in path, it will depend on the target system having it.")
-    endif()
-
-    # Copy shaderc/spirv-cross into the bundle
-    get_target_property(SPIRV_CROSS_LIBRARY spirv-cross-c-shared IMPORTED_SONAME_RELEASE)
-    get_target_property(SHADERC_LIBRARY Shaderc::shaderc_shared IMPORTED_LOCATION_RELEASE)
-    target_sources(${target} PRIVATE "${SHADERC_LIBRARY}" "${SPIRV_CROSS_LIBRARY}")
-    set_source_files_properties("${SHADERC_LIBRARY}" "${SPIRV_CROSS_LIBRARY}" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-
-    # Copy FFmpeg libraries into the bundle
-    foreach(component avcodec avformat avutil swresample swscale)
-      string(REGEX REPLACE "\([0-9]+\)\.[0-9]+\.[0-9]+" "\\1" major "${FFMPEG_${component}_VERSION}")
-      string(REPLACE "lib${component}.dylib" "lib${component}.${major}.dylib" version_lib "${FFMPEG_${component}_LIBRARIES}")
-      target_sources(${target} PRIVATE ${version_lib})
-      set_source_files_properties(${target} PRIVATE ${version_lib} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
-    endforeach()
-  elseif(ALLOW_INSTALL)
-    # Ensure we look for dependency libraries in the installation directory.
-    set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN")
-
-    # Copy dependency libraries to installation directory.
-    install_imported_dep_library(SDL3::SDL3)
-    install_imported_dep_library(Shaderc::shaderc_shared)
-    install_imported_dep_library(spirv-cross-c-shared)
-    install_imported_dep_library(SoundTouch::SoundTouchDLL)
-    install_imported_dep_library(plutosvg::plutosvg)
-  endif()
-endfunction()
+    target

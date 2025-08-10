@@ -1,4 +1,7 @@
-add_library(core
+# src/core/CMakeLists.txt
+
+# Explicit library type + standard for reproducibility
+add_library(core STATIC
   achievements.cpp
   achievements.h
   achievements_private.h
@@ -133,94 +136,144 @@ add_library(core
   types.h
 )
 
+# Recompiler source set
 set(RECOMPILER_SRCS
   cpu_recompiler.cpp
   cpu_recompiler.h
 )
 
+# Tooling / language
 target_precompile_headers(core PRIVATE "pch.h")
-target_include_directories(core PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_include_directories(core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_link_libraries(core PUBLIC Threads::Threads common util)
-target_link_libraries(core PRIVATE xxhash imgui rapidyaml rcheevos cpuinfo::cpuinfo ZLIB::ZLIB zstd::libzstd_shared libzip::zip)
+target_compile_features(core PRIVATE cxx_std_20)
 
+# Include layout:
+# - PUBLIC includes propagate to dependents (e.g., frontends)
+# - PRIVATE keeps internals internal
+target_include_directories(core
+  PUBLIC  "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+# Link interface:
+# - PUBLIC: minimal ABI surface needed by dependents
+# - PRIVATE: implementation deps (system-lib-first via imported/Find targets)
+target_link_libraries(core
+  PUBLIC
+    Threads::Threads
+    common
+    util
+  PRIVATE
+    xxhash
+    imgui
+    rapidyaml
+    rcheevos
+    cpuinfo::cpuinfo
+    ZLIB::ZLIB
+    zstd::libzstd_shared
+    libzip::zip
+)
+
+# Per-arch recompilers (ENABLE_RECOMPILER/ENABLE_MMAP_FASTMEM handled here)
 if(CPU_ARCH_X64)
-  target_compile_definitions(core PUBLIC "ENABLE_RECOMPILER=1" "ENABLE_MMAP_FASTMEM=1")
   target_sources(core PRIVATE
     ${RECOMPILER_SRCS}
     cpu_recompiler_x64.cpp
     cpu_recompiler_x64.h
   )
+  target_compile_definitions(core PUBLIC ENABLE_RECOMPILER=1 ENABLE_MMAP_FASTMEM=1)
   target_link_libraries(core PRIVATE xbyak)
-  if(CMAKE_BUILD_TYPE MATCHES "Debug|Devel")
-    target_link_libraries(core PRIVATE zydis)
-  endif()
-  message(STATUS "Building x64 recompiler.")
+  # Multi-config friendly zydis link only in Debug/Devel
+  target_link_libraries(core PRIVATE
+    $<$<CONFIG:Debug,Devel>:zydis>
+  )
+  message(STATUS "core: enabling x64 recompiler")
 endif()
+
 if(CPU_ARCH_ARM32)
-  target_compile_definitions(core PUBLIC "ENABLE_RECOMPILER=1")
   target_sources(core PRIVATE
     ${RECOMPILER_SRCS}
     cpu_recompiler_arm32.cpp
     cpu_recompiler_arm32.h
   )
+  target_compile_definitions(core PUBLIC ENABLE_RECOMPILER=1)
   target_link_libraries(core PUBLIC vixl)
-  message(STATUS "Building ARM32 recompiler.")
+  message(STATUS "core: enabling ARM32 recompiler")
 endif()
+
 if(CPU_ARCH_ARM64)
-  target_compile_definitions(core PUBLIC "ENABLE_RECOMPILER=1" "ENABLE_MMAP_FASTMEM=1")
   target_sources(core PRIVATE
     ${RECOMPILER_SRCS}
     cpu_recompiler_arm64.cpp
     cpu_recompiler_arm64.h
   )
+  target_compile_definitions(core PUBLIC ENABLE_RECOMPILER=1 ENABLE_MMAP_FASTMEM=1)
   target_link_libraries(core PUBLIC vixl)
-  message(STATUS "Building ARM64 recompiler.")
+  message(STATUS "core: enabling ARM64 recompiler")
 endif()
+
 if(CPU_ARCH_RISCV64)
-  target_compile_definitions(core PUBLIC "ENABLE_RECOMPILER=1" "ENABLE_MMAP_FASTMEM=1")
   target_sources(core PRIVATE
     ${RECOMPILER_SRCS}
     cpu_recompiler_riscv64.cpp
     cpu_recompiler_riscv64.h
   )
+  target_compile_definitions(core PUBLIC ENABLE_RECOMPILER=1 ENABLE_MMAP_FASTMEM=1)
   target_link_libraries(core PUBLIC biscuit::biscuit riscv-disas)
-  message(STATUS "Building RISC-V-64 recompiler.")
+  message(STATUS "core: enabling RISC-V-64 recompiler")
 endif()
 
-# Copy the provided data directory to the output directory. Borrowed from PCSX2.
+# Visibility for cleaner shared boundaries (even if STATIC now, future-proof)
+set_target_properties(core PROPERTIES
+  CXX_VISIBILITY_PRESET hidden
+  VISIBILITY_INLINES_HIDDEN ON
+)
+
+# Resource helpers
+option(DUCKSTATION_COPY_RUNTIME_RESOURCES "Copy resources next to binaries (disable for distro builds)" OFF)
+
 function(add_resources target path basedir)
-	get_filename_component(dir ${path} DIRECTORY)
-	file(RELATIVE_PATH subdir ${basedir} ${dir})
-	if(APPLE)
-		target_sources(${target} PRIVATE ${path})
-		set_source_files_properties(${path} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/${subdir})
-	else()
-		add_custom_command(TARGET ${target} POST_BUILD
-			COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:${target}>/resources/${subdir}"
-			COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${path}" "$<TARGET_FILE_DIR:${target}>/resources/${subdir}")
-	endif()
-	source_group(Resources/${subdir} FILES ${path})
+  if(NOT DUCKSTATION_COPY_RUNTIME_RESOURCES)
+    return()
+  endif()
+  get_filename_component(dir ${path} DIRECTORY)
+  file(RELATIVE_PATH subdir ${basedir} ${dir})
+  if(APPLE)
+    target_sources(${target} PRIVATE ${path})
+    set_source_files_properties(${path} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/${subdir})
+  else()
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:${target}>/resources/${subdir}"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${path}" "$<TARGET_FILE_DIR:${target}>/resources/${subdir}")
+  endif()
+  source_group(Resources/${subdir} FILES ${path})
 endfunction()
 
 function(add_core_resources target)
-  add_util_resources(${target})
+  # Make util resource helpers optional
+  if(COMMAND add_util_resources)
+    add_util_resources(${target})
+  endif()
 
   if(APPLE)
     # Copy discord-rpc into the bundle
     get_target_property(DISCORD_RPC_LIBRARY DiscordRPC::discord-rpc IMPORTED_LOCATION_RELEASE)
-    target_sources(${target} PRIVATE "${DISCORD_RPC_LIBRARY}")
-    set_source_files_properties("${DISCORD_RPC_LIBRARY}" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+    if(DISCORD_RPC_LIBRARY)
+      target_sources(${target} PRIVATE "${DISCORD_RPC_LIBRARY}")
+      set_source_files_properties("${DISCORD_RPC_LIBRARY}" PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+    endif()
   endif()
 
-  file(GLOB_RECURSE RESOURCE_FILES ${CMAKE_SOURCE_DIR}/data/resources/*)
-  foreach(path IN LISTS RESOURCE_FILES)
-    get_filename_component(file ${path} NAME)
-    if("${file}" MATCHES "^\\.") # Don't copy macOS garbage (mainly Finder's .DS_Store files) into application
-      continue()
-    endif()
-    add_resources(${target} ${path} ${CMAKE_SOURCE_DIR}/data/resources/)
-  endforeach()
+  if(DUCKSTATION_COPY_RUNTIME_RESOURCES)
+    file(GLOB_RECURSE RESOURCE_FILES ${CMAKE_SOURCE_DIR}/data/resources/*)
+    foreach(path IN LISTS RESOURCE_FILES)
+      get_filename_component(file ${path} NAME)
+      if("${file}" MATCHES "^[.]")
+        continue()
+      endif()
+      add_resources(${target} ${path} ${CMAKE_SOURCE_DIR}/data/resources/)
+    endforeach()
+  endif()
+
   if(ALLOW_INSTALL)
     install_imported_dep_library(cpuinfo::cpuinfo)
     install_imported_dep_library(DiscordRPC::discord-rpc)
@@ -228,10 +281,8 @@ function(add_core_resources target)
     install(DIRECTORY "$<TARGET_FILE_DIR:${target}>/resources" DESTINATION "${CMAKE_INSTALL_BINDIR}")
   endif()
 
-  # Linux platforms need a copy of the .desktop and icon file because Wayland stupidity.
-  # See QtHost::EarlyProcessStartup() for where this is used and why. We still need to set it when running
-  # as a Flatpak, but thankfully we don't need the extra copy.
-  if((LINUX OR BSD) AND (NOT DEFINED ENV{container}))
+  # Wayland desktop file/icon for native (non-container) Linux/BSD
+  if((LINUX OR BSD) AND (NOT DEFINED ENV{container}) AND DUCKSTATION_COPY_RUNTIME_RESOURCES)
     message(STATUS "Copying desktop file to resources directory.")
     set(PACKAGING_SOURCE_DIR "${CMAKE_SOURCE_DIR}/scripts/packaging")
     foreach(path "org.duckstation.DuckStation.desktop" "org.duckstation.DuckStation.png")

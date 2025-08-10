@@ -1,137 +1,116 @@
-add_library(common
-  align.h
+# src/common/CMakeLists.txt
+
+add_library(common STATIC
+  # ░░ Core error/reporting & assertion utilities ░░
   assert.cpp
   assert.h
-  binary_reader_writer.cpp
-  binary_reader_writer.h
-  bitfield.h
-  bitutils.h
-  crash_handler.cpp
-  crash_handler.h
-  dimensional_array.h
-  dynamic_library.cpp
-  dynamic_library.h
   error.cpp
   error.h
+  log.cpp
+  log.h
+  log_channels.h
+  perf_scope.cpp
+  perf_scope.h
+  progress_callback.cpp
+  progress_callback.h
+
+  # ░░ Assertions, crash handlers, fastjmp ░░
+  crash_handler.cpp
+  crash_handler.h
   fastjmp.cpp
   fastjmp.h
-  fifo_queue.h
+
+  # ░░ File I/O and binary utilities ░░
+  binary_reader_writer.cpp
+  binary_reader_writer.h
   file_system.cpp
   file_system.h
+  path.h
+
+  # ░░ Digest and hash utils ░░
+  md5_digest.cpp
+  md5_digest.h
+  sha1_digest.cpp
+  sha1_digest.h
+  sha256_digest.cpp
+  sha256_digest.h
+  hash_combine.h
+  xorshift_prng.h
+
+  # ░░ Threading and task primitives ░░
+  thread.cpp
+  threading.cpp
+  threading.h
+  thread.cpp
+  task_queue.cpp
+  task_queue.h
+  scoped_guard.h
+
+  # ░░ Settings and layered config interfaces ░░
+  layered_settings_interface.cpp
+  layered_settings_interface.h
+  memory_settings_interface.cpp
+  memory_settings_interface.h
+  settings_interface.h
+
+  # ░░ Small string and string utilities ░░
+  small_string.cpp
+  small_string.h
+  string_util.cpp
+  string_util.h
+
+  # ░░ Time and performance ░░
+  timer.cpp
+  timer.h
+
+  # ░░ Math, SIMD, and vector formats ░░
   gsvector.cpp
   gsvector.h
   gsvector_formatter.h
   gsvector_neon.h
   gsvector_nosimd.h
   gsvector_sse.h
+  dimensional_array.h
+
+  # ░░ Low-level memory and type utilities ░░
+  align.h
   intrin.h
-  hash_combine.h
   heap_array.h
-  heterogeneous_containers.h
-  layered_settings_interface.cpp
-  layered_settings_interface.h
-  log.cpp
-  log.h
-  log_channels.h
+  types.h
+  bitfield.h
+  bitutils.h
+  ryml_helpers.h
+
+  # ░░ OS abstraction ░░
+  dynamic_library.cpp
+  dynamic_library.h
   memmap.cpp
   memmap.h
-  md5_digest.cpp
-  md5_digest.h
-  memory_settings_interface.cpp
-  memory_settings_interface.h
   minizip_helpers.h
-  path.h
-  perf_scope.cpp
-  perf_scope.h
-  progress_callback.cpp
-  progress_callback.h
-  ryml_helpers.h
-  scoped_guard.h
-  settings_interface.h
-  sha1_digest.cpp
-  sha1_digest.h
-  sha256_digest.cpp
-  sha256_digest.h
-  small_string.cpp
-  small_string.h
-  string_util.cpp
-  string_util.h
+
+  # ░░ Meta container utilities ░░
+  heterogeneous_containers.h
+
+  # ░░ Third-party embedded libs ░░
   thirdparty/SmallVector.cpp
   thirdparty/SmallVector.h
   thirdparty/aes.cpp
   thirdparty/aes.h
-  task_queue.cpp
-  task_queue.h
-  threading.cpp
-  threading.h
-  timer.cpp
-  timer.h
-  types.h
-  xorshift_prng.h
 )
 
-target_include_directories(common PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_include_directories(common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
-target_link_libraries(common PUBLIC fmt Threads::Threads fast_float)
-target_link_libraries(common PRIVATE "${CMAKE_DL_LIBS}")
+target_include_directories(common
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
-if(WIN32)
-  target_sources(common PRIVATE
-    thirdparty/StackWalker.cpp
-    thirdparty/StackWalker.h
-    windows_headers.h
-  )
-  target_link_libraries(common PRIVATE OneCore.lib)
-endif()
+target_compile_features(common PRIVATE cxx_std_20)
 
-if(MSVC)
-  if(CPU_ARCH_X64)
-    enable_language(ASM_MASM)
-    target_sources(common PRIVATE fastjmp_x86.asm)
-    set_source_files_properties(fastjmp_x86.asm PROPERTIES COMPILE_FLAGS "/D_M_X86_64")
-  elseif(CPU_ARCH_ARM32 OR CPU_ARCH_ARM64)
-    enable_language(ASM_MARMASM)
-    target_sources(common PRIVATE fastjmp_arm.asm)
-  endif()
-endif()
+target_compile_options(common PRIVATE
+  $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fexceptions>
+)
 
-if(APPLE)
-  set(MAC_SOURCES
-    cocoa_tools.h
-    cocoa_tools.mm
-  )
-  target_sources(common PRIVATE ${MAC_SOURCES})
-  set_source_files_properties(${MAC_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS TRUE)
-  find_library(COCOA_LIBRARY Cocoa REQUIRED)
-  target_link_libraries(common PRIVATE ${COCOA_LIBRARY})
-endif()
+target_link_libraries(common PRIVATE ds::fmt)
 
-if(NOT WIN32 AND NOT ANDROID AND NOT APPLE)
-  target_link_libraries(common PRIVATE libbacktrace::libbacktrace)
-endif()
-
-if(ANDROID)
-  target_link_libraries(common PRIVATE log)
-endif()
-
-if(LINUX)
-  # We need -lrt for shm_unlink
-  target_link_libraries(common PRIVATE rt)
-endif()
-
-# If the host size was detected, we need to set it as a macro.
-if(DEFINED HOST_MIN_PAGE_SIZE AND DEFINED HOST_MAX_PAGE_SIZE)
-  target_compile_definitions(common PUBLIC
-    "-DMIN_HOST_PAGE_SIZE=${HOST_MIN_PAGE_SIZE}"
-    "-DMAX_HOST_PAGE_SIZE=${HOST_MAX_PAGE_SIZE}"
-  )
-elseif(DEFINED HOST_PAGE_SIZE)
-  target_compile_definitions(common PUBLIC
-    "-DOVERRIDE_HOST_PAGE_SIZE=${HOST_PAGE_SIZE}"
-  )
-endif()
-if(DEFINED HOST_CACHE_LINE_SIZE)
-	target_compile_definitions(common PUBLIC
-    "-DOVERRIDE_HOST_CACHE_LINE_SIZE=${HOST_CACHE_LINE_SIZE}"
-  )
-endif()
+set_target_properties(common PROPERTIES
+  CXX_VISIBILITY_PRESET hidden
+  VISIBILITY_INLINES_HIDDEN ON
+)
