@@ -255,13 +255,14 @@ endif()
 # Platform stacks (SDL, Wayland/X11, audio)
 # ------------------------------------------------------------------------------
 
+# SDL
 if(ENABLE_SDL3)
   find_package(SDL3 REQUIRED)  # Provides SDL3::SDL3
-  add_library(ds::sdl INTERFACE)
-  target_link_libraries(ds::sdl INTERFACE SDL3::SDL3)
+  add_library(ds_sdl INTERFACE)
+  target_link_libraries(ds_sdl INTERFACE SDL3::SDL3)
 elseif(ENABLE_SDL2)
   find_package(SDL2 REQUIRED)  # Provides SDL2::SDL2
-  add_library(ds::sdl ALIAS SDL2::SDL2)
+  add_library(ds_sdl ALIAS SDL2::SDL2)
 endif()
 
 # Wayland / X11 / EGL / GBM
