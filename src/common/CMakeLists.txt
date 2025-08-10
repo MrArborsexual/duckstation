@@ -40,7 +40,6 @@ add_library(common STATIC
   # ░░ Threading and task primitives ░░
   threading.cpp
   threading.h
-  thread.cpp
   task_queue.cpp
   task_queue.h
   scoped_guard.h
