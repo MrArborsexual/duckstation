@@ -1,4 +1,5 @@
 # src/duckstation-qt/CMakeLists.txt
+find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
 
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
