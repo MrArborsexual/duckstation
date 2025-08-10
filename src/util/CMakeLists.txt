@@ -303,4 +303,6 @@ elseif(NOT ANDROID)
   target_include_directories(util PRIVATE ${DBUS_INCLUDE_DIRS})
 
   if(LINUX)
-    target
+  target_sources(util PRIVATE platform_misc_linux.cpp)
+  target_link_libraries(util PRIVATE UDEV::UDEV)
+endif()
