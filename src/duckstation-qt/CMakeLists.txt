@@ -254,4 +254,10 @@ if(ALLOW_INSTALL)
   install(TARGETS duckstation-qt RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endif()
 
-copy_base_translations(duckstation-qt)
+# Manual installation of base Qt translations (if present)
+file(GLOB BASE_QM_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/*.qm")
+set(BASE_TRANSLATION_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}/translations")
+
+if(ALLOW_INSTALL AND BASE_QM_FILES)
+  install(FILES ${BASE_QM_FILES} DESTINATION "${BASE_TRANSLATION_INSTALL_DIR}")
+endif()
