@@ -309,22 +309,30 @@ endif()
 # These subdirectories should link to the ds::<name> imported targets defined above.
 # ------------------------------------------------------------------------------
 
-# Example layout (you will create these CMakeLists with add_library/add_executable and target_link_libraries):
-# add_subdirectory(src/common)
-# add_subdirectory(src/util)
-# add_subdirectory(src/core)
-# if(BUILD_QT_FRONTEND)
-#   add_subdirectory(src/duckstation-qt)
-# endif()
-# if(BUILD_MINI_FRONTEND)
-#   add_subdirectory(src/duckstation-mini)
-# endif()
-# if(BUILD_REGTEST)
-#   add_subdirectory(src/duckstation-regtest)
-# endif()
-# if(BUILD_TESTS)
-#   add_subdirectory(tests)
-# endif()
+# Core emulator logic (always needed)
+add_subdirectory(src/common)
+add_subdirectory(src/util)
+add_subdirectory(src/core)
+
+# Optional frontends
+if(BUILD_QT_FRONTEND)
+  add_subdirectory(src/duckstation-qt)
+endif()
+
+if(BUILD_MINI_FRONTEND)
+  add_subdirectory(src/duckstation-mini)
+endif()
+
+# Optional CLI / automation utilities
+if(BUILD_REGTEST)
+  add_subdirectory(src/duckstation-regtest)
+endif()
+
+# Optional test suite
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif()
+
 
 # ------------------------------------------------------------------------------
 # Summary
