@@ -84,6 +84,15 @@ target_include_directories(util
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+find_package(JPEG QUIET)
+
+if(JPEG_FOUND AND TARGET JPEG::JPEG)
+  # Already defined
+else()
+  ds_import_from_pkg(libjpeg ds::jpeg)
+  add_library(JPEG::JPEG ALIAS ds::jpeg)
+endif()
+
 target_link_libraries(util
   PUBLIC
     common

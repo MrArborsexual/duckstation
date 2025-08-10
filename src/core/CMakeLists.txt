@@ -1,5 +1,8 @@
 # src/core/CMakeLists.txt
 
+find_package(Threads REQUIRED)
+target_link_libraries(core PRIVATE Threads::Threads)
+
 # Explicit library type + standard for reproducibility
 add_library(core STATIC
   achievements.cpp
