@@ -191,6 +191,15 @@ endif()
 # SPIRV-Cross C API (pkg-config: spirv-cross-c)
 ds_import_from_pkg(spirv-cross-c ds::spirv_cross_c)
 
+# Alias expected upstream targets for compatibility
+if(TARGET ds::shaderc)
+  add_library(Shaderc::shaderc_shared ALIAS ds::shaderc)
+endif()
+
+if(TARGET ds::spirv_cross_c)
+  add_library(spirv-cross-c-shared ALIAS ds::spirv_cross_c)
+endif()
+
 # Vulkan and OpenGL
 if(ENABLE_VULKAN)
   find_package(Vulkan REQUIRED) # provides Vulkan::Vulkan

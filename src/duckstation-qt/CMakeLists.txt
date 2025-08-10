@@ -1,5 +1,5 @@
 # src/duckstation-qt/CMakeLists.txt
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
 
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
@@ -171,8 +171,6 @@ set(TS_FILES
   translations/duckstation-qt_tr.ts
   translations/duckstation-qt_zh-CN.ts
 )
-
-qt_add_lrelease(duckstation-qt TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 
 add_executable(duckstation-qt ${SRCS} ${QM_FILES})
 
