@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.19)
 
 # Linux-only, C++20 baseline
 project(duckstation LANGUAGES C CXX)
+
 if(WIN32 OR APPLE)
   message(FATAL_ERROR "This fork only supports Linux.")
 endif()

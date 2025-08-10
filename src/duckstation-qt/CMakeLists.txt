@@ -1,5 +1,5 @@
 # src/duckstation-qt/CMakeLists.txt
-find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 
 set(CMAKE_AUTOUIC OFF)
 set(CMAKE_AUTOMOC ON)
@@ -195,9 +195,9 @@ target_link_libraries(duckstation-qt
     imgui
     minizip
     scmversion
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
 )
 
 set_target_properties(duckstation-qt PROPERTIES
