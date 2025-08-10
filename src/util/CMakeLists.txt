@@ -302,7 +302,7 @@ elseif(NOT ANDROID)
   pkg_check_modules(DBUS REQUIRED dbus-1)
   target_include_directories(util PRIVATE ${DBUS_INCLUDE_DIRS})
 
-  if(LINUX)
+elseif(LINUX)
   target_sources(util PRIVATE platform_misc_linux.cpp)
   target_link_libraries(util PRIVATE UDEV::UDEV)
 endif()
