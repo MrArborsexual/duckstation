@@ -38,7 +38,6 @@ add_library(common STATIC
   xorshift_prng.h
 
   # ░░ Threading and task primitives ░░
-  thread.cpp
   threading.cpp
   threading.h
   thread.cpp
