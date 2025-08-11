@@ -87,18 +87,20 @@ target_include_directories(util
 # Prefer CMake's find_package; fallback to pkg-config if missing
 find_package(JPEG QUIET)
 find_package(PNG QUIET)
-find_package(libwebp QUIET)
+find_package(WebP QUIET)
 find_package(ZLIB QUIET)
 find_package(SoundTouch QUIET)
-find_package(libzstd QUIET)
-find_package(plutosvg QUIET)
+find_package(zstd QUIET)      # module name is 'zstd' for FindZSTD.cmake; pkg-config name is libzstd
+find_package(plutosvg QUIET)  # typically not provided; we handle via pkg-config
 
 # JPEG
 if(JPEG_FOUND AND TARGET JPEG::JPEG)
   add_library(ds::jpeg ALIAS JPEG::JPEG)
 else()
   ds_import_from_pkg(libjpeg ds::jpeg)
-  add_library(JPEG::JPEG ALIAS ds::jpeg)
+  if(NOT TARGET JPEG::JPEG)
+    add_library(JPEG::JPEG ALIAS ds::jpeg)
+  endif()
 endif()
 
 # PNG
@@ -106,60 +108,76 @@ if(PNG_FOUND AND TARGET PNG::PNG)
   add_library(ds::png ALIAS PNG::PNG)
 else()
   ds_import_from_pkg(libpng ds::png)
-  add_library(PNG::PNG ALIAS ds::png)
+  if(NOT TARGET PNG::PNG)
+    add_library(PNG::PNG ALIAS ds::png)
+  endif()
 endif()
 
 # WebP
-if(WebP_FOUND AND TARGET libwebp::libwebp)
-  add_library(ds::libwebp ALIAS libwebp::libwebp)
-elseif(NOT TARGET ds::libwebp)
-  ds_import_from_pkg(libwebp ds::libwebp)
-  add_library(libwebp::libwebp ALIAS ds::libwebp)
+if(WebP_FOUND AND TARGET WebP::libwebp)
+  add_library(ds::webp ALIAS WebP::libwebp)
+else()
+  ds_import_from_pkg(libwebp ds::webp)
+  if(NOT TARGET WebP::libwebp)
+    add_library(WebP::libwebp ALIAS ds::webp)
+  endif()
 endif()
 
-# PlutoSVG
+# PlutoSVG (force canonical target via pkg-config if missing)
 if(TARGET plutosvg::plutosvg)
   add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
-elseif(NOT TARGET ds::plutosvg)
-  ds_import_from_pkg(plutosvg ds::plutosvg)
-  add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+else()
+  if(NOT TARGET ds::plutosvg)
+    ds_import_from_pkg(plutosvg ds::plutosvg)
+  endif()
+  if(NOT TARGET plutosvg::plutosvg)
+    add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+  endif()
 endif()
 
 # ZLIB
 if(ZLIB_FOUND AND TARGET ZLIB::ZLIB)
   add_library(ds::zlib ALIAS ZLIB::ZLIB)
 else()
-  ds_import_from_pkg(zlib ds::zlib)
-  add_library(ZLIB::ZLIB ALIAS ds::zlib)
+  if(NOT TARGET ds::zlib)
+    ds_import_from_pkg(zlib ds::zlib)
+  endif()
+  if(NOT TARGET ZLIB::ZLIB)
+    add_library(ZLIB::ZLIB ALIAS ds::zlib)
+  endif()
 endif()
 
-# SoundTouch fallback
+# SoundTouch: define a concrete imported interface target when config/alias is missing
 if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
   add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
-elseif(NOT TARGET ds::soundtouch)
-  ds_import_from_pkg(soundtouch ds::soundtouch)
-  # Create expected alias for downstream compatibility
+else()
+  # Ensure pkg-config import exists
+  if(NOT TARGET ds::soundtouch)
+    # Populate variables with pkg-config; we need them to set properties
+    pkg_check_modules(DS_SOUNDTOUCH REQUIRED soundtouch)
+    add_library(ds::soundtouch INTERFACE IMPORTED)
+    set_target_properties(ds::soundtouch PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${DS_SOUNDTOUCH_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES      "${DS_SOUNDTOUCH_LINK_LIBRARIES}"
+      INTERFACE_COMPILE_OPTIONS     "${DS_SOUNDTOUCH_CFLAGS_OTHER}"
+    )
+  endif()
+
+  # Create the canonical target expected by downstream code
   if(NOT TARGET SoundTouch::SoundTouchDLL)
     add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
   endif()
 endif()
 
 # zstd
-if(libzstd_FOUND AND TARGET libzstd::libzstd_shared)
-  add_library(ds::libzstd ALIAS libzstd::libzstd_shared)
-elseif(NOT TARGET ds::libzstd)
-  ds_import_from_pkg(libzstd ds::libzstd)
-  add_library(libzstd::libzstd_shared ALIAS ds::libzstd)
-endif()
-
-# PlutoSVG
-if(TARGET plutosvg::plutosvg)
-  add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
-elseif(NOT TARGET ds::plutosvg)
-  ds_import_from_pkg(plutosvg ds::plutosvg)
-  # Ensure the canonical target exists, even if not provided by upstream
-  if(NOT TARGET plutosvg::plutosvg)
-    add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+if(zstd_FOUND AND TARGET zstd::libzstd_shared)
+  add_library(ds::zstd ALIAS zstd::libzstd_shared)
+else()
+  if(NOT TARGET ds::zstd)
+    ds_import_from_pkg(libzstd ds::zstd)
+  endif()
+  if(NOT TARGET zstd::libzstd_shared)
+    add_library(zstd::libzstd_shared ALIAS ds::zstd)
   endif()
 endif()
 
@@ -174,11 +192,11 @@ target_link_libraries(util
     lzma
     JPEG::JPEG
     PNG::PNG
-    libwebp::libwebp
-    ds::plutosvg
+    WebP::libwebp
+    plutosvg::plutosvg
     ZLIB::ZLIB
     SoundTouch::SoundTouchDLL
-    libzstd::libzstd_shared
+    zstd::libzstd_shared
     xxhash
     reshadefx
 )
