@@ -15,7 +15,7 @@
 #include "common/string_util.h"
 
 #include "fmt/format.h"
-#include "libchdr/cdrom.h" // EDC functions
+#include "chdr/cdrom.h" // EDC functions
 
 #include <algorithm>
 #include <cinttypes>
