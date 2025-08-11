@@ -28,7 +28,7 @@
 #include "fmt/format.h"
 #include "imgui/imgui.h"
 #include "imgui_freetype.h"
-#include "imgui_internal.h"
+#include "imgui/imgui_internal.h"
 
 #include <atomic>
 #include <chrono>

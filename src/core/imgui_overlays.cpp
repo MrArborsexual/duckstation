@@ -40,7 +40,7 @@
 #include "IconsPromptFont.h"
 #include "fmt/chrono.h"
 #include "imgui/imgui.h"
-#include "imgui_internal.h"
+#include "imgui/imgui_internal.h"
 
 #include <array>
 #include <atomic>

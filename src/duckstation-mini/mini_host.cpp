@@ -28,7 +28,7 @@
 #include "util/sdl_input_source.h"
 
 #include "imgui/imgui.h"
-#include "imgui_internal.h"
+#include "imgui/imgui_internal.h"
 #include "imgui_stdlib.h"
 
 #include "common/assert.h"

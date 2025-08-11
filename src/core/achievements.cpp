@@ -45,7 +45,7 @@
 #include "IconsPromptFont.h"
 #include "fmt/format.h"
 #include "imgui/imgui.h"
-#include "imgui_internal.h"
+#include "imgui/imgui_internal.h"
 #include "rc_api_runtime.h"
 #include "rc_client.h"
 #include "rc_consoles.h"

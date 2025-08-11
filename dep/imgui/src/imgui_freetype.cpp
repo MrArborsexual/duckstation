@@ -40,7 +40,7 @@
 #include "imgui/imgui.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_freetype.h"
-#include "imgui_internal.h"     // ImMin,ImMax,ImFontAtlasBuild*,
+#include "imgui/imgui_internal.h"     // ImMin,ImMax,ImFontAtlasBuild*,
 #include <stdint.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H          // <freetype/freetype.h>
