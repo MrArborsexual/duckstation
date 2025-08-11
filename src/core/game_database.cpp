@@ -30,7 +30,7 @@
 #include <type_traits>
 
 #include "IconsEmoji.h"
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "fmt/format.h"
 
 LOG_CHANNEL(GameDatabase);

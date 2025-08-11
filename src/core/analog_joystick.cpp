@@ -13,7 +13,7 @@
 #include "common/settings_interface.h"
 #include "common/string_util.h"
 
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "IconsPromptFont.h"
 #include "fmt/format.h"
 

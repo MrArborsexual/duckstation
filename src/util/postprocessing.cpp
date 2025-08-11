@@ -15,7 +15,7 @@
 #include "core/host.h"
 #include "core/settings.h"
 
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "common/assert.h"
 #include "common/error.h"
 #include "common/file_system.h"

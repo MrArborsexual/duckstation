@@ -27,7 +27,7 @@
 #include "common/timer.h"
 
 #include "IconsEmoji.h"
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 
 #ifndef XXH_STATIC_LINKING_ONLY
 #define XXH_STATIC_LINKING_ONLY

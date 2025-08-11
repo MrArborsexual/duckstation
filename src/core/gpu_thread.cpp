@@ -30,7 +30,7 @@
 #include "common/timer.h"
 
 #include "IconsEmoji.h"
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "fmt/format.h"
 #include "imgui.h"
 

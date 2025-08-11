@@ -8,7 +8,7 @@
 #include "common/small_string.h"
 #include "common/types.h"
 
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 

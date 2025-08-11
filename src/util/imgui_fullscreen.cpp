@@ -26,7 +26,7 @@
 #include "fmt/core.h"
 
 #include "IconsEmoji.h"
-#include "IconsFontAwesome6.h"
+#include "iconfontcppheaders/IconsFontAwesome6.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 
