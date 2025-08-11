@@ -87,45 +87,36 @@ target_include_directories(util
 # Prefer CMake's find_package; fallback to pkg-config if missing
 find_package(JPEG QUIET)
 find_package(PNG QUIET)
-find_package(WebP QUIET)
 find_package(ZLIB QUIET)
 find_package(SoundTouch QUIET)
-find_package(zstd QUIET)      # module name is 'zstd' for FindZSTD.cmake; pkg-config name is libzstd
-find_package(plutosvg QUIET)  # typically not provided; we handle via pkg-config
+find_package(zstd QUIET)      # Find module name: zstd; pkg-config name: libzstd
+find_package(plutosvg QUIET)  # Custom or pkg-config only
 
 # JPEG
 if(JPEG_FOUND AND TARGET JPEG::JPEG)
   add_library(ds::jpeg ALIAS JPEG::JPEG)
-else()
+elseif(NOT TARGET ds::jpeg)
   ds_import_from_pkg(libjpeg ds::jpeg)
-  if(NOT TARGET JPEG::JPEG)
-    add_library(JPEG::JPEG ALIAS ds::jpeg)
-  endif()
+  add_library(JPEG::JPEG ALIAS ds::jpeg)
 endif()
 
 # PNG
 if(PNG_FOUND AND TARGET PNG::PNG)
   add_library(ds::png ALIAS PNG::PNG)
-else()
+elseif(NOT TARGET ds::png)
   ds_import_from_pkg(libpng ds::png)
-  if(NOT TARGET PNG::PNG)
-    add_library(PNG::PNG ALIAS ds::png)
-  endif()
+  add_library(PNG::PNG ALIAS ds::png)
 endif()
 
-# WebP
-if(TARGET ds::webp)
-  # Already defined, do nothing
-elseif(WebP_FOUND AND TARGET WebP::libwebp)
-  add_library(ds::webp ALIAS WebP::libwebp)
-else()
-  ds_import_from_pkg(libwebp ds::webp)
-  if(NOT TARGET WebP::libwebp)
-    add_library(WebP::libwebp ALIAS ds::webp)
-  endif()
+# WebP: no native CMake config provided by libwebp, use pkg-config directly
+if(NOT TARGET ds::libwebp)
+  ds_import_from_pkg(libwebp ds::libwebp)
+endif()
+if(NOT TARGET WebP::libwebp)
+  add_library(WebP::libwebp ALIAS ds::libwebp)
 endif()
 
-# PlutoSVG (force canonical target via pkg-config if missing)
+# PlutoSVG
 if(TARGET plutosvg::plutosvg)
   add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
 else()
@@ -140,47 +131,33 @@ endif()
 # ZLIB
 if(ZLIB_FOUND AND TARGET ZLIB::ZLIB)
   add_library(ds::zlib ALIAS ZLIB::ZLIB)
-else()
-  if(NOT TARGET ds::zlib)
-    ds_import_from_pkg(zlib ds::zlib)
-  endif()
-  if(NOT TARGET ZLIB::ZLIB)
-    add_library(ZLIB::ZLIB ALIAS ds::zlib)
-  endif()
+elseif(NOT TARGET ds::zlib)
+  ds_import_from_pkg(zlib ds::zlib)
+  add_library(ZLIB::ZLIB ALIAS ds::zlib)
 endif()
 
-# SoundTouch: define a concrete imported interface target when config/alias is missing
+# SoundTouch
 if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
   add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
-else()
-  # Ensure pkg-config import exists
-  if(NOT TARGET ds::soundtouch)
-    # Populate variables with pkg-config; we need them to set properties
-    pkg_check_modules(DS_SOUNDTOUCH REQUIRED soundtouch)
-    add_library(ds::soundtouch INTERFACE IMPORTED)
-    set_target_properties(ds::soundtouch PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${DS_SOUNDTOUCH_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES      "${DS_SOUNDTOUCH_LINK_LIBRARIES}"
-      INTERFACE_COMPILE_OPTIONS     "${DS_SOUNDTOUCH_CFLAGS_OTHER}"
-    )
-  endif()
-
-  # Create the canonical target expected by downstream code
-  if(NOT TARGET SoundTouch::SoundTouchDLL)
-    add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
-  endif()
+elseif(NOT TARGET ds::soundtouch)
+  pkg_check_modules(DS_SOUNDTOUCH REQUIRED soundtouch)
+  add_library(ds::soundtouch INTERFACE IMPORTED)
+  set_target_properties(ds::soundtouch PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${DS_SOUNDTOUCH_INCLUDE_DIRS}"
+    INTERFACE_LINK_LIBRARIES      "${DS_SOUNDTOUCH_LINK_LIBRARIES}"
+    INTERFACE_COMPILE_OPTIONS     "${DS_SOUNDTOUCH_CFLAGS_OTHER}"
+  )
+endif()
+if(NOT TARGET SoundTouch::SoundTouchDLL)
+  add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
 endif()
 
 # zstd
 if(zstd_FOUND AND TARGET zstd::libzstd_shared)
   add_library(ds::zstd ALIAS zstd::libzstd_shared)
-else()
-  if(NOT TARGET ds::zstd)
-    ds_import_from_pkg(libzstd ds::zstd)
-  endif()
-  if(NOT TARGET zstd::libzstd_shared)
-    add_library(zstd::libzstd_shared ALIAS ds::zstd)
-  endif()
+elseif(NOT TARGET ds::zstd)
+  ds_import_from_pkg(libzstd ds::zstd)
+  add_library(zstd::libzstd_shared ALIAS ds::zstd)
 endif()
 
 # Link targets
