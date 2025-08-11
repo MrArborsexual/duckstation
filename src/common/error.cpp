@@ -9,7 +9,6 @@
 #include <cstring>
 #include <cwctype>
 #include <type_traits>
-#include <cassert>
 
 #include "fmt/format.h"
 
