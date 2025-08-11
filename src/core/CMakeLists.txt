@@ -1,8 +1,5 @@
 # src/core/CMakeLists.txt
 
-find_package(Threads REQUIRED)
-target_link_libraries(core PRIVATE Threads::Threads)
-
 # Explicit library type + standard for reproducibility
 add_library(core STATIC
   achievements.cpp
@@ -149,17 +146,15 @@ set(RECOMPILER_SRCS
 target_precompile_headers(core PRIVATE "pch.h")
 target_compile_features(core PRIVATE cxx_std_20)
 
-# Include layout:
-# - PUBLIC includes propagate to dependents (e.g., frontends)
-# - PRIVATE keeps internals internal
+# Includes
 target_include_directories(core
   PUBLIC  "${CMAKE_CURRENT_SOURCE_DIR}/.."
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Link interface:
-# - PUBLIC: minimal ABI surface needed by dependents
-# - PRIVATE: implementation deps (system-lib-first via imported/Find targets)
+# Link dependencies
+find_package(Threads REQUIRED)
+
 target_link_libraries(core
   PUBLIC
     Threads::Threads
@@ -176,7 +171,7 @@ target_link_libraries(core
     libzip::zip
 )
 
-# Per-arch recompilers (ENABLE_RECOMPILER/ENABLE_MMAP_FASTMEM handled here)
+# Per-arch recompilers
 if(CPU_ARCH_X64)
   target_sources(core PRIVATE
     ${RECOMPILER_SRCS}
@@ -185,7 +180,6 @@ if(CPU_ARCH_X64)
   )
   target_compile_definitions(core PUBLIC ENABLE_RECOMPILER=1 ENABLE_MMAP_FASTMEM=1)
   target_link_libraries(core PRIVATE xbyak)
-  # Multi-config friendly zydis link only in Debug/Devel
   target_link_libraries(core PRIVATE
     $<$<CONFIG:Debug,Devel>:zydis>
   )
@@ -225,7 +219,7 @@ if(CPU_ARCH_RISCV64)
   message(STATUS "core: enabling RISC-V-64 recompiler")
 endif()
 
-# Visibility for cleaner shared boundaries (even if STATIC now, future-proof)
+# Visibility
 set_target_properties(core PROPERTIES
   CXX_VISIBILITY_PRESET hidden
   VISIBILITY_INLINES_HIDDEN ON
@@ -252,13 +246,11 @@ function(add_resources target path basedir)
 endfunction()
 
 function(add_core_resources target)
-  # Make util resource helpers optional
   if(COMMAND add_util_resources)
     add_util_resources(${target})
   endif()
 
   if(APPLE)
-    # Copy discord-rpc into the bundle
     get_target_property(DISCORD_RPC_LIBRARY DiscordRPC::discord-rpc IMPORTED_LOCATION_RELEASE)
     if(DISCORD_RPC_LIBRARY)
       target_sources(${target} PRIVATE "${DISCORD_RPC_LIBRARY}")
@@ -284,7 +276,6 @@ function(add_core_resources target)
     install(DIRECTORY "$<TARGET_FILE_DIR:${target}>/resources" DESTINATION "${CMAKE_INSTALL_BINDIR}")
   endif()
 
-  # Wayland desktop file/icon for native (non-container) Linux/BSD
   if((LINUX OR BSD) AND (NOT DEFINED ENV{container}) AND DUCKSTATION_COPY_RUNTIME_RESOURCES)
     message(STATUS "Copying desktop file to resources directory.")
     set(PACKAGING_SOURCE_DIR "${CMAKE_SOURCE_DIR}/scripts/packaging")
