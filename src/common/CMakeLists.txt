@@ -1,3 +1,7 @@
+target_precompile_headers(common PRIVATE
+  "${PROJECT_SOURCE_DIR}/src/common/pch.h"
+)
+
 # src/common/CMakeLists.txt
 
 add_library(common STATIC
