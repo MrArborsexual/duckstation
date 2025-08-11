@@ -89,7 +89,7 @@ find_package(JPEG QUIET)
 find_package(PNG QUIET)
 find_package(ZLIB QUIET)
 find_package(SoundTouch QUIET)
-find_package(zstd QUIET)      # Find module name: zstd; pkg-config name: libzstd
+find_package(libzstd QUIET)      # Find module name: zstd; pkg-config name: libzstd
 find_package(plutosvg QUIET)  # Custom or pkg-config only
 
 # JPEG
