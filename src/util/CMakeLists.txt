@@ -91,6 +91,7 @@ find_package(libwebp QUIET)
 find_package(ZLIB QUIET)
 find_package(SoundTouch QUIET)
 find_package(libzstd QUIET)
+find_package(plutosvg QUIET)
 
 # JPEG
 if(JPEG_FOUND AND TARGET JPEG::JPEG)
