@@ -114,7 +114,9 @@ else()
 endif()
 
 # WebP
-if(WebP_FOUND AND TARGET WebP::libwebp)
+if(TARGET ds::webp)
+  # Already defined, do nothing
+elseif(WebP_FOUND AND TARGET WebP::libwebp)
   add_library(ds::webp ALIAS WebP::libwebp)
 else()
   ds_import_from_pkg(libwebp ds::webp)
