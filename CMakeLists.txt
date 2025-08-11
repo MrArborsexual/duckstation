@@ -32,7 +32,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Always enable PIC on Linux and exceptions (SoundTouch and friends require exceptions)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_compile_options($<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-fexceptions>)
-add_compile_options($<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-include <cassert>)
+add_compile_options($<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-include cassert)
 
 # ------------------------------------------------------------------------------
 # Options (align with your package.use defaults)
