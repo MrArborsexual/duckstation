@@ -172,7 +172,7 @@ target_link_libraries(util
     JPEG::JPEG
     PNG::PNG
     libwebp::libwebp
-    plutosvg::plutosvg
+    ds::plutosvg
     ZLIB::ZLIB
     SoundTouch::SoundTouchDLL
     libzstd::libzstd_shared
