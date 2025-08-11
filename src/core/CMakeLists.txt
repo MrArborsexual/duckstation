@@ -153,8 +153,48 @@ target_include_directories(core
 )
 
 # Link dependencies
+# Required thread support
 find_package(Threads REQUIRED)
 
+# Prefer CMake's find_package; fallback to pkg-config if missing
+find_package(ZLIB QUIET)
+find_package(zstd QUIET)
+find_package(libzip QUIET)
+find_package(cpuinfo QUIET)
+
+# ZLIB
+if(ZLIB_FOUND AND TARGET ZLIB::ZLIB)
+  add_library(ds::zlib ALIAS ZLIB::ZLIB)
+else()
+  ds_import_from_pkg(zlib ds::zlib)
+  add_library(ZLIB::ZLIB ALIAS ds::zlib)
+endif()
+
+# zstd
+if(zstd_FOUND AND TARGET zstd::libzstd_shared)
+  add_library(ds::zstd ALIAS zstd::libzstd_shared)
+else()
+  ds_import_from_pkg(zstd ds::zstd)
+  add_library(zstd::libzstd_shared ALIAS ds::zstd)
+endif()
+
+# libzip
+if(libzip_FOUND AND TARGET libzip::zip)
+  add_library(ds::libzip ALIAS libzip::zip)
+else()
+  ds_import_from_pkg(libzip ds::libzip)
+  add_library(libzip::zip ALIAS ds::libzip)
+endif()
+
+# cpuinfo
+if(cpuinfo_FOUND AND TARGET cpuinfo::cpuinfo)
+  add_library(ds::cpuinfo ALIAS cpuinfo::cpuinfo)
+else()
+  ds_import_from_pkg(cpuinfo ds::cpuinfo)
+  add_library(cpuinfo::cpuinfo ALIAS ds::cpuinfo)
+endif()
+
+# Final linkage
 target_link_libraries(core
   PUBLIC
     Threads::Threads

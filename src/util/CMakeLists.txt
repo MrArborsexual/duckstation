@@ -84,15 +84,71 @@ target_include_directories(util
   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+# Prefer CMake's find_package; fallback to pkg-config if missing
 find_package(JPEG QUIET)
+find_package(PNG QUIET)
+find_package(WebP QUIET)
+find_package(ZLIB QUIET)
+find_package(SoundTouch QUIET)
+find_package(zstd QUIET)
 
+# JPEG
 if(JPEG_FOUND AND TARGET JPEG::JPEG)
-  # Already defined
+  add_library(ds::jpeg ALIAS JPEG::JPEG)
 else()
   ds_import_from_pkg(libjpeg ds::jpeg)
   add_library(JPEG::JPEG ALIAS ds::jpeg)
 endif()
 
+# PNG
+if(PNG_FOUND AND TARGET PNG::PNG)
+  add_library(ds::png ALIAS PNG::PNG)
+else()
+  ds_import_from_pkg(libpng ds::png)
+  add_library(PNG::PNG ALIAS ds::png)
+endif()
+
+# WebP
+if(WebP_FOUND AND TARGET WebP::libwebp)
+  add_library(ds::webp ALIAS WebP::libwebp)
+else()
+  ds_import_from_pkg(libwebp ds::webp)
+  add_library(WebP::libwebp ALIAS ds::webp)
+endif()
+
+# PlutoSVG
+if(TARGET plutosvg::plutosvg)
+  add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
+else()
+  ds_import_from_pkg(plutosvg ds::plutosvg)
+  add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+endif()
+
+# ZLIB
+if(ZLIB_FOUND AND TARGET ZLIB::ZLIB)
+  add_library(ds::zlib ALIAS ZLIB::ZLIB)
+else()
+  ds_import_from_pkg(zlib ds::zlib)
+  add_library(ZLIB::ZLIB ALIAS ds::zlib)
+endif()
+
+# SoundTouch
+if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
+  add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
+else()
+  ds_import_from_pkg(soundtouch ds::soundtouch)
+  add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
+endif()
+
+# zstd
+if(zstd_FOUND AND TARGET zstd::libzstd_shared)
+  add_library(ds::zstd ALIAS zstd::libzstd_shared)
+else()
+  ds_import_from_pkg(zstd ds::zstd)
+  add_library(zstd::libzstd_shared ALIAS ds::zstd)
+endif()
+
+# Link targets
 target_link_libraries(util
   PUBLIC
     common
@@ -107,8 +163,8 @@ target_link_libraries(util
     plutosvg::plutosvg
     ZLIB::ZLIB
     SoundTouch::SoundTouchDLL
-    xxhash
     zstd::libzstd_shared
+    xxhash
     reshadefx
 )
 
