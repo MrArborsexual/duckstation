@@ -149,12 +149,15 @@ elseif(NOT TARGET ds::libzstd)
   add_library(libzstd::libzstd_shared ALIAS ds::libzstd)
 endif()
 
-# PlutoSVG fallback
+# PlutoSVG
 if(TARGET plutosvg::plutosvg)
   add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
 elseif(NOT TARGET ds::plutosvg)
   ds_import_from_pkg(plutosvg ds::plutosvg)
-  add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+  # Ensure the canonical target exists, even if not provided by upstream
+  if(NOT TARGET plutosvg::plutosvg)
+    add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
+  endif()
 endif()
 
 # Link targets
