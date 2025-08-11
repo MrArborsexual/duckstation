@@ -138,7 +138,10 @@ if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
   add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
 elseif(NOT TARGET ds::soundtouch)
   ds_import_from_pkg(soundtouch ds::soundtouch)
-  add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
+  # Ensure alias target is defined for downstream linkage
+  if(NOT TARGET SoundTouch::SoundTouchDLL)
+    add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
+  endif()
 endif()
 
 # zstd
