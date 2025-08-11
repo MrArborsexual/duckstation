@@ -15,7 +15,7 @@
 #include "common/string_util.h"
 
 #include "fmt/format.h"
-#include "chdr/cdrom.h"
+#include "libchdr/cdrom.h"
 #include "libchdr/chd.h"
 
 #include <algorithm>
