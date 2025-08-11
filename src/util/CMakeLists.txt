@@ -87,10 +87,10 @@ target_include_directories(util
 # Prefer CMake's find_package; fallback to pkg-config if missing
 find_package(JPEG QUIET)
 find_package(PNG QUIET)
-find_package(WebP QUIET)
+find_package(libwebp QUIET)
 find_package(ZLIB QUIET)
 find_package(SoundTouch QUIET)
-find_package(zstd QUIET)
+find_package(libzstd QUIET)
 
 # JPEG
 if(JPEG_FOUND AND TARGET JPEG::JPEG)
@@ -109,11 +109,11 @@ else()
 endif()
 
 # WebP
-if(WebP_FOUND AND TARGET WebP::libwebp)
-  add_library(ds::webp ALIAS WebP::libwebp)
-elseif(NOT TARGET ds::webp)
-  ds_import_from_pkg(libwebp ds::webp)
-  add_library(WebP::libwebp ALIAS ds::webp)
+if(WebP_FOUND AND TARGET libwebp::libwebp)
+  add_library(ds::libwebp ALIAS libwebp::libwebp)
+elseif(NOT TARGET ds::libwebp)
+  ds_import_from_pkg(libwebp ds::libwebp)
+  add_library(libwebp::libwebp ALIAS ds::libwebp)
 endif()
 
 # PlutoSVG
@@ -159,7 +159,7 @@ target_link_libraries(util
     lzma
     JPEG::JPEG
     PNG::PNG
-    WebP::libwebp
+    libwebp::libwebp
     plutosvg::plutosvg
     ZLIB::ZLIB
     SoundTouch::SoundTouchDLL
