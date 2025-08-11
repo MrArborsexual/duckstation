@@ -133,12 +133,12 @@ else()
   add_library(ZLIB::ZLIB ALIAS ds::zlib)
 endif()
 
-# SoundTouch
+# SoundTouch fallback
 if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
   add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
 elseif(NOT TARGET ds::soundtouch)
   ds_import_from_pkg(soundtouch ds::soundtouch)
-  # Ensure alias target is defined for downstream linkage
+  # Create expected alias for downstream compatibility
   if(NOT TARGET SoundTouch::SoundTouchDLL)
     add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
   endif()
