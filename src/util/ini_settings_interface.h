@@ -8,6 +8,7 @@
 #ifdef _WIN32
 #include "common/windows_headers.h"
 #endif
+#define SI_CONVERT_ICU
 #include "SimpleIni.h"
 
 class INISettingsInterface final : public SettingsInterface
