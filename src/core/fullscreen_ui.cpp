@@ -41,7 +41,7 @@
 #include "IconsEmoji.h"
 #include "IconsFontAwesome6.h"
 #include "IconsPromptFont.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "imgui_internal.h"
 
 #include <atomic>

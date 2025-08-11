@@ -27,7 +27,7 @@
 #include "util/platform_misc.h"
 #include "util/sdl_input_source.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 

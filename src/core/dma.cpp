@@ -8,7 +8,7 @@
 #include "cpu_core.h"
 #include "gpu.h"
 #include "gpu_dump.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "interrupt_controller.h"
 #include "mdec.h"
 #include "pad.h"

@@ -15,7 +15,7 @@
 #include "common/gsvector.h"
 #include "common/timer.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 #include <algorithm>
 #include <array>

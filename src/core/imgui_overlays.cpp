@@ -39,7 +39,7 @@
 #include "IconsEmoji.h"
 #include "IconsPromptFont.h"
 #include "fmt/chrono.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "imgui_internal.h"
 
 #include <array>

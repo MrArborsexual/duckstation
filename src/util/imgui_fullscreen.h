@@ -9,7 +9,7 @@
 #include "common/types.h"
 
 #include "iconfontcppheaders/IconsFontAwesome6.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "imgui_internal.h"
 
 #include "fmt/format.h"
