@@ -171,8 +171,8 @@ else()
 endif()
 
 # zstd
-if(zstd_FOUND AND TARGET libzstd::libzstd_shared)
-  add_library(ds::zstd ALIAS zstd::libzstd_shared)
+if(libzstd_FOUND AND TARGET libzstd::libzstd_shared)
+  add_library(ds::libzstd ALIAS libzstd::libzstd_shared)
 else()
   ds_import_from_pkg(libzstd ds::libzstd)
   add_library(libzstd::libzstd_shared ALIAS ds::libzstd)
