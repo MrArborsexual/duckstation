@@ -111,7 +111,7 @@ endif()
 # WebP
 if(WebP_FOUND AND TARGET WebP::libwebp)
   add_library(ds::webp ALIAS WebP::libwebp)
-else()
+elseif(NOT TARGET ds::webp)
   ds_import_from_pkg(libwebp ds::webp)
   add_library(WebP::libwebp ALIAS ds::webp)
 endif()
@@ -119,7 +119,7 @@ endif()
 # PlutoSVG
 if(TARGET plutosvg::plutosvg)
   add_library(ds::plutosvg ALIAS plutosvg::plutosvg)
-else()
+elseif(NOT TARGET ds::plutosvg)
   ds_import_from_pkg(plutosvg ds::plutosvg)
   add_library(plutosvg::plutosvg ALIAS ds::plutosvg)
 endif()
@@ -135,17 +135,17 @@ endif()
 # SoundTouch
 if(SoundTouch_FOUND AND TARGET SoundTouch::SoundTouchDLL)
   add_library(ds::soundtouch ALIAS SoundTouch::SoundTouchDLL)
-else()
+elseif(NOT TARGET ds::soundtouch)
   ds_import_from_pkg(soundtouch ds::soundtouch)
   add_library(SoundTouch::SoundTouchDLL ALIAS ds::soundtouch)
 endif()
 
 # zstd
-if(zstd_FOUND AND TARGET zstd::libzstd_shared)
-  add_library(ds::zstd ALIAS zstd::libzstd_shared)
-else()
-  ds_import_from_pkg(zstd ds::zstd)
-  add_library(zstd::libzstd_shared ALIAS ds::zstd)
+if(libzstd_FOUND AND TARGET libzstd::libzstd_shared)
+  add_library(ds::libzstd ALIAS libzstd::libzstd_shared)
+elseif(NOT TARGET ds::libzstd)
+  ds_import_from_pkg(libzstd ds::libzstd)
+  add_library(libzstd::libzstd_shared ALIAS ds::libzstd)
 endif()
 
 # Link targets
@@ -163,7 +163,7 @@ target_link_libraries(util
     plutosvg::plutosvg
     ZLIB::ZLIB
     SoundTouch::SoundTouchDLL
-    zstd::libzstd_shared
+    libzstd::libzstd_shared
     xxhash
     reshadefx
 )

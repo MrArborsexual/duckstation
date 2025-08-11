@@ -158,7 +158,7 @@ find_package(Threads REQUIRED)
 
 # Prefer CMake's find_package; fallback to pkg-config if missing
 find_package(ZLIB QUIET)
-find_package(zstd QUIET)
+find_package(libzstd QUIET)
 find_package(libzip QUIET)
 find_package(cpuinfo QUIET)
 
@@ -171,11 +171,11 @@ else()
 endif()
 
 # zstd
-if(zstd_FOUND AND TARGET zstd::libzstd_shared)
+if(zstd_FOUND AND TARGET libzstd::libzstd_shared)
   add_library(ds::zstd ALIAS zstd::libzstd_shared)
 else()
-  ds_import_from_pkg(zstd ds::zstd)
-  add_library(zstd::libzstd_shared ALIAS ds::zstd)
+  ds_import_from_pkg(libzstd ds::libzstd)
+  add_library(libzstd::libzstd_shared ALIAS ds::libzstd)
 endif()
 
 # libzip
@@ -207,7 +207,7 @@ target_link_libraries(core
     rcheevos
     cpuinfo::cpuinfo
     ZLIB::ZLIB
-    zstd::libzstd_shared
+    libzstd::libzstd_shared
     libzip::zip
 )
 
