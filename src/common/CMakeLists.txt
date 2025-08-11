@@ -96,12 +96,11 @@ add_library(common STATIC
   thirdparty/aes.h
 )
 
-target_precompile_headers(common PRIVATE
-  "${PROJECT_SOURCE_DIR}/src/common/pch.h"
-)
+target_precompile_headers(common PRIVATE "${PROJECT_SOURCE_DIR}/src/common/pch.h")
 
 target_include_directories(common
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+  PUBLIC "${PROJECT_SOURCE_DIR}/src"
+  PUBLIC "${PROJECT_SOURCE_DIR}/src/common"
 )
 
 target_compile_features(common PRIVATE cxx_std_20)
