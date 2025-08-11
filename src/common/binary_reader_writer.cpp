@@ -6,7 +6,7 @@
 #include "error.h"
 #include "small_string.h"
 
-#include "common/file_system.h"
+#include "file_system.h"
 
 BinarySpanReader::BinarySpanReader() = default;
 

@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstring>
 #include <type_traits>
+#include <assert>
 
 #if (defined(__x86_64) || defined(__x86_64__) || defined(_M_X64)   \
        || defined(__amd64) || defined(__aarch64__) || defined(_M_ARM64) \
