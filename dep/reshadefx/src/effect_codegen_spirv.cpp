@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_parser.hpp"
-#include "effect_codegen.hpp"
+#include "reshade/effect_parser.hpp"
+#include "reshade/effect_codegen.hpp"
 #include <cassert>
 #include <cstring> // std::memcmp
 #include <charconv> // std::from_chars

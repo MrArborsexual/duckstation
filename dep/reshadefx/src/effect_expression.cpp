@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_expression.hpp"
+#include "reshade/effect_expression.hpp"
 #include <cmath> // std::fmod
 #include <cassert>
 #include <cstring> // std::memcpy, std::memset

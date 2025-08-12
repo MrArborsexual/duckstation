@@ -20,9 +20,9 @@
 #include "common/progress_callback.h"
 #include "common/string_util.h"
 
-#include "effect_codegen.hpp"
-#include "effect_parser.hpp"
-#include "effect_preprocessor.hpp"
+#include "reshade/effect_codegen.hpp"
+#include "reshade/effect_parser.hpp"
+#include "reshade/effect_preprocessor.hpp"
 
 #include "fmt/format.h"
 

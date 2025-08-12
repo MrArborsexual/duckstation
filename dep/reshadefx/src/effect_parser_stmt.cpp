@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_lexer.hpp"
-#include "effect_parser.hpp"
-#include "effect_codegen.hpp"
+#include "reshade/effect_lexer.hpp"
+#include "reshade/effect_parser.hpp"
+#include "reshade/effect_codegen.hpp"
 #include <cctype> // std::toupper
 #include <cassert>
 #include <climits>

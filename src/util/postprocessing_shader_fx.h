@@ -9,7 +9,7 @@
 #include "common/timer.h"
 
 // reshadefx
-#include "effect_module.hpp"
+#include "reshade/effect_module.hpp"
 
 #include <random>
 

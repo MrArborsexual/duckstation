@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_parser.hpp"
-#include "effect_codegen.hpp"
+#include "reshade/effect_parser.hpp"
+#include "reshade/effect_codegen.hpp"
 #include <cmath> // std::isinf, std::isnan, std::signbit
 #include <cctype> // std::tolower
 #include <cassert>

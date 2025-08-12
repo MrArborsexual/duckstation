@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "effect_token.hpp"
+#include "reshade/effect_token.hpp"
 #include <cstdint>
 #include <memory> // std::unique_ptr
 #include <filesystem>

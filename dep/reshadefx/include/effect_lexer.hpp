@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "effect_token.hpp"
+#include "reshade/effect_token.hpp"
 
 namespace reshadefx
 {

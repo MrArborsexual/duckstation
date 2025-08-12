@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_lexer.hpp"
+#include "reshade/effect_lexer.hpp"
 #include <cassert>
 #include <string_view>
 #include <unordered_map> // Used for static lookup tables

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "effect_expression.hpp"
+#include "reshade/effect_expression.hpp"
 #include <cstdint>
 
 namespace reshadefx

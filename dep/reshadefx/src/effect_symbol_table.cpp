@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_symbol_table.hpp"
+#include "reshade/effect_symbol_table.hpp"
 #include <cassert>
 #ifndef __APPLE__
 #include <malloc.h> // alloca

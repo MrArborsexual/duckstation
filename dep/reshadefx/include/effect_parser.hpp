@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "effect_symbol_table.hpp"
+#include "reshade/effect_symbol_table.hpp"
 #include <memory> // std::unique_ptr
 
 namespace reshadefx

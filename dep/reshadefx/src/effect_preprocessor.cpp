@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "effect_lexer.hpp"
-#include "effect_preprocessor.hpp"
+#include "reshade/effect_lexer.hpp"
+#include "reshade/effect_preprocessor.hpp"
 #include <cstdio> // fclose, fopen, fread, fseek
 #include <cassert>
 #include <algorithm> // std::find_if
