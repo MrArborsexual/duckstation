@@ -13,7 +13,7 @@
 #include "common/string_util.h"
 
 #include "p7zip/C/7zCrc.h"
-#include "Alloc.h"
+#include "p7zip/C/Alloc.h"
 #include "Xz.h"
 #include "XzCrc64.h"
 #include "XzEnc.h"
