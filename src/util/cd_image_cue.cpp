@@ -21,6 +21,9 @@
 #include <cinttypes>
 #include <map>
 
+extern "C" uint32_t edc_compute(const uint8_t* src, size_t size);
+extern "C" void edc_set(uint8_t* dest, size_t size);
+
 LOG_CHANNEL(CDImage);
 
 namespace {
