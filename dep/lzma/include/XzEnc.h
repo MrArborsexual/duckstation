@@ -6,7 +6,7 @@
 
 #include "Lzma2Enc.h"
 
-#include "Xz.h"
+#include "p7zip/C/Xz.h"
 
 EXTERN_C_BEGIN
 

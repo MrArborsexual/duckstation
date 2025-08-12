@@ -14,9 +14,9 @@
 
 #include "p7zip/C/7zCrc.h"
 #include "p7zip/C/Alloc.h"
-#include "Xz.h"
-#include "XzCrc64.h"
-#include "XzEnc.h"
+#include "p7zip/C/Xz.h"
+#include "p7zip/C/XzCrc64.h"
+#include "p7zip/C/XzEnc.h"
 
 #include <zstd.h>
 #include <zstd_errors.h>
