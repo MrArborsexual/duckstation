@@ -12,7 +12,7 @@
 #include "common/scoped_guard.h"
 #include "common/string_util.h"
 
-#include "7zCrc.h"
+#include "p7zip/C/7zCrc.h"
 #include "Alloc.h"
 #include "Xz.h"
 #include "XzCrc64.h"
